@@ -28,6 +28,14 @@ def count_words(list_of_strings: list[str], starts_with: str) -> dict[str, int]:
 
     Returns (dict): the words and counts of each word that starts with the given
     """
+    count_dict = {}
+    for i in range(len(list_of_strings)):
+        if(list_of_strings[i].startswith(starts_with)):
+            if(list_of_strings[i] in count_dict):
+                count_dict[list_of_strings[i]] += 1
+            else:
+                count_dict[list_of_strings[i]] = 1
+    return count_dict
     raise NotImplementedError("todo: count_words")
 
 
