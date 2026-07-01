@@ -92,6 +92,17 @@ def get_all_paths(t: TreeNode) -> list[list[int]]:
 
     Returns (list): the list of paths
     """
+    if(t.is_leaf()):
+        return [[t.value]]
+    
+    paths = []
+    for i in range(len(t.children)):
+        child_paths = get_all_paths(t.children[i])
+        for pat in child_paths:
+            paths.append([t.value] + pat)
+    
+    return paths
+    
     raise NotImplementedError("todo: get_all_paths")
 
 class InsufficientFundsError(Exception):
