@@ -104,6 +104,9 @@ def get_all_paths(t: TreeNode) -> list[list[int]]:
     return paths
     
     raise NotImplementedError("todo: get_all_paths")
+class CannotBeNegative(Exception):
+    
+    pass
 
 class InsufficientFundsError(Exception):
     """
@@ -124,9 +127,10 @@ class Account(ABC):
     """
     def __init__(self, account_number: int, balance: float = 0):
         self._account_number = account_number
+        if(balance < 0):
+            raise CannotBeNegative("Balance can't be negative")
         self._balance = float(balance)
 
-    @abstractmethod
     def deposit(self, amount: float) -> None:
         """
         Makes a deposit in the account.
@@ -136,9 +140,11 @@ class Account(ABC):
 
         Returns: Nothing
         """
-        raise NotImplementedError
+        if(amount < 0):
+            raise CannotBeNegative("Amount can't be negative")
+        self._balance += amount
+        return None
 
-    @abstractmethod
     def withdraw(self, amount: float) -> float:
         """
         Makes a withdrawal from the account.
@@ -148,18 +154,24 @@ class Account(ABC):
 
         Returns (float): Withdrawn amount.
         """
-        raise NotImplementedError
+        if amount < 0:
+            raise CannotBeNegative("Amount can't be negative")
+        
+        if amount > self._balance:
+            raise InsufficientFundsError("Not enough funds in balance to withdraw")
 
+        
+        self._balance -= amount
+        return amount
+    
     @property
-    @abstractmethod
     def balance(self) -> float:
         """
         Returns the balance of the account
 
         Returns (float): Account balance
         """
-        raise NotImplementedError
-
+        return self._balance
 
 class SavingsAccount(Account):
     """
