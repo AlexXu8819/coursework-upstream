@@ -174,18 +174,81 @@ class Account(ABC):
         return self._balance
 
 class SavingsAccount(Account):
+
     """
     Class to represent a savings account
     """
+    def deposit(self, amount):
+        if(amount < 0):
+            raise CannotBeNegative("Amount can't be negative")
+        self._balance += amount
+    
+    def withdraw(self, amount):
+        if(amount < 0):
+            raise CannotBeNegative("Amount can't be negative")
+        if(amount > self._balance):
+            raise InsufficientFundsError("Not enough money in account")
 
+        self._balance -= amount
+
+        return amount
 
 class CheckingAccount(Account):
     """
     Class to represent a checking account
     """
 
+    def __init__(self, account_number, balance, overdraft):
+        super().__init__(account_number, balance)
+        if(overdraft < 0):
+            raise CannotBeNegative("Can't be negative overdraft")
+        self._available_overdraft = overdraft
+        self._overdraft_limit = overdraft
+    
+    @property
+    def balance(self):
+        return self._balance
+    
+    def withdraw(self, amount):
+        if(amount < 0):
+            raise CannotBeNegative("Amount can't be negative")
+        if(amount > self._available_overdraft + self._balance):
+            raise InsufficientFundsError("Not enough funds to withdraw")
+        if(amount < self._balance):
+            self._balance -= amount
+            return amount
+        
+        gap = amount - self._balance
+        self._balance = 0
+        self._available_overdraft -= gap
+        return amount
+    
+    def deposit(self, amount):
+        if(amount < 0):
+            raise CannotBeNegative("Amount can't be negative")
+        gap = min(amount, self._overdraft_limit - self._available_overdraft)
+
+        self._available_overdraft += gap
+        self._balance += amount - gap
 
 class HighYieldSavingsAccount(SavingsAccount):
     """
     Class to represent a high yeild savings account
     """
+    def __init__(self, account_number, balance, min_balance, interest_rate):
+        super().__init__(account_number, balance)
+        if(min_balance < 0 or interest_rate < 0):
+            raise CannotBeNegative("Minimum balance and interest rate can't be negative")
+        self._min_balance = min_balance
+        self._interest_rate = interest_rate
+    
+    def add_monthly_interest(self):
+        self._balance = self._balance + (self._interest_rate * self._balance)
+
+    def withdraw(self, amount):
+        if(self._balance - amount < self._min_balance):
+            raise InsufficientFundsError("Can't drop below minimum account balance")
+        
+        return super().withdraw(amount)
+        
+
